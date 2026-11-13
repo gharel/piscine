@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>Calculateur piscine au sel</title>
-<meta name="description" content="Doses de pH, stabilisant, sel, anti-phosphates et chlore pour une piscine au sel avec électrolyseur, selon le volume, avec le détail des calculs.">
+<meta name="description" content="Doses de TAC, pH, stabilisant, sel, anti-phosphates et chlore pour une piscine au sel avec électrolyseur, selon le volume, avec le détail des calculs.">
+<script>
+  // Mode d'affichage posé avant le rendu, pour éviter un saut de mise en page
+  try { document.documentElement.dataset.mode = localStorage.getItem('calculateur-piscine-mode') === 'avance' ? 'avance' : 'simple'; }
+  catch (e) { document.documentElement.dataset.mode = 'simple'; }
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3C11 10 7 15 7 20a9 9 0 0 0 18 0c0-5-4-10-9-17z' fill='%230b6e83'/%3E%3C/svg%3E">
 <style>
 :root {
@@ -165,6 +170,14 @@ h3 { font-size: 1rem; margin: 18px 0 0; }
 footer { font-size: .82rem; color: var(--muted); margin-top: 16px; }
 footer p { margin: 6px 0; }
 .hint strong { color: var(--text); }
+[data-mode="simple"] .adv, [data-mode="avance"] .simple { display: none !important; }
+.mode {
+  display: inline-flex; gap: 2px; padding: 3px; margin: 0 0 8px;
+  border: 1px solid var(--accent); border-radius: 999px; background: var(--surface);
+}
+.mode button { border: 0; background: transparent; color: var(--link); padding: 6px 18px; }
+.mode button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
+.mode-note { margin: 0 0 16px; font-size: .88rem; color: var(--muted); }
 table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .92rem; }
 .reco th, .reco td { text-align: left; vertical-align: top; padding: 8px 8px 8px 0; border-bottom: 1px solid var(--border); }
 .reco thead th { font-size: .8rem; font-weight: 600; color: var(--muted); }
@@ -182,7 +195,13 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
 <div class="wrap">
 <header>
   <h1>Calculateur piscine au sel</h1>
-  <p>Doses de TAC, pH, stabilisant, sel, anti-phosphates et chlore pour une piscine avec électrolyseur, selon son volume. Chaque résultat montre son calcul.</p>
+  <p>Doses de TAC, pH, stabilisant, sel, anti-phosphates et chlore pour une piscine avec électrolyseur, selon son volume.</p>
+  <div class="mode" role="group" aria-label="Version de l'application">
+    <button type="button" data-mode-btn="simple">Simple</button>
+    <button type="button" data-mode-btn="avance">Avancée</button>
+  </div>
+  <p class="mode-note simple">Version simple : saisissez seulement vos mesures. Cibles et produits sont réglés sur les valeurs conseillées ; pour les modifier et voir le détail des calculs, passez en version avancée.</p>
+  <p class="mode-note adv">Version avancée : cibles, produits, électrolyseur, dose de l'étiquette et détail de chaque calcul.</p>
 </header>
 
 <main>
@@ -190,7 +209,7 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
   <div class="card-head"><h2 id="t-bassin">Votre bassin</h2></div>
   <div class="grid">
     <label class="f">Volume (m³)<input id="volume" data-save inputmode="decimal" autocomplete="off"></label>
-    <label class="f">Température de l'eau (°C)<input id="temp" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f adv">Température de l'eau (°C)<input id="temp" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
   <details id="vol-aide">
     <summary>Calculer le volume</summary>
@@ -212,7 +231,7 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
   </details>
 </section>
 
-<section class="card" aria-labelledby="t-reco">
+<section class="card adv" aria-labelledby="t-reco">
   <div class="card-head"><h2 id="t-reco">Valeurs recommandées</h2></div>
   <p class="hint">Pour une piscine au sel avec électrolyseur. Les champs « visé » sont pré-remplis avec ces valeurs.</p>
   <table class="reco">
@@ -233,9 +252,11 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
   <div class="card-head"><span class="step">1</span><h2 id="t-tac">TAC (alcalinité)</h2><span class="chip" id="s-tac"></span></div>
   <div class="grid">
     <label class="f">TAC mesuré (mg/L)<input id="tac" data-save inputmode="decimal" placeholder="ex. 110" autocomplete="off"></label>
-    <label class="f">TAC visé (mg/L)<input id="tac-cible" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f adv">TAC visé (mg/L)<input id="tac-cible" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <p class="hint"><strong>Conseillé :</strong> viser 80 à 90 mg/L (plage 80 à 120). Avec un électrolyseur, le bas de la plage limite la remontée du pH. Votre trousse donne des °f ? Multipliez par 10.</p>
+  <p class="hint adv"><strong>Conseillé :</strong> viser 80 à 90 mg/L (plage 80 à 120). Avec un électrolyseur, le bas de la plage limite la remontée du pH. Votre trousse donne des °f ? Multipliez par 10.</p>
+  <p class="hint simple" id="h-tac"></p>
+  <div class="result" id="r-tac" aria-live="polite"></div>
   <details>
     <summary>Qu'est-ce que le TAC ?</summary>
     <div class="explain">
@@ -250,17 +271,16 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
       </ul>
     </div>
   </details>
-  <div class="result" id="r-tac" aria-live="polite"></div>
-  <details><summary>Détail du calcul</summary><ol class="calc" id="d-tac"></ol></details>
+  <details class="adv"><summary>Détail du calcul</summary><ol class="calc" id="d-tac"></ol></details>
 </section>
 
 <section class="card" aria-labelledby="t-ph">
   <div class="card-head"><span class="step">2</span><h2 id="t-ph">pH</h2><span class="chip" id="s-ph"></span></div>
   <div class="grid">
     <label class="f">pH mesuré<input id="ph" data-save inputmode="decimal" placeholder="ex. 7,6" autocomplete="off"></label>
-    <label class="f">pH visé<input id="ph-cible" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f adv">pH visé<input id="ph-cible" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <div class="grid">
+  <div class="grid adv">
     <label class="f wide">pH moins utilisé
       <select id="ph-produit" data-save>
         <option value="bisulfate">Poudre (bisulfate de sodium)</option>
@@ -270,40 +290,43 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
     </label>
     <label class="f"><span id="ph-pct-label">Pureté (%)</span><input id="ph-pct" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <p class="hint"><strong>Conseillé :</strong> viser 7,2 (plage 7,0 à 7,4). L'électrolyse fait monter le pH : contrôlez-le chaque semaine. Plus il est bas, plus le chlore est actif. pH plus : carbonate de sodium.</p>
+  <p class="hint adv"><strong>Conseillé :</strong> viser 7,2 (plage 7,0 à 7,4). L'électrolyse fait monter le pH : contrôlez-le chaque semaine. Plus il est bas, plus le chlore est actif. pH plus : carbonate de sodium.</p>
+  <p class="hint simple" id="h-ph"></p>
   <div class="result" id="r-ph" aria-live="polite"></div>
-  <details><summary>Détail du calcul</summary><ol class="calc" id="d-ph"></ol></details>
+  <details class="adv"><summary>Détail du calcul</summary><ol class="calc" id="d-ph"></ol></details>
 </section>
 
 <section class="card" aria-labelledby="t-stab">
   <div class="card-head"><span class="step">3</span><h2 id="t-stab">Stabilisant</h2><span class="chip" id="s-stab"></span></div>
   <div class="grid">
     <label class="f">Mesuré (mg/L)<input id="stab" data-save inputmode="decimal" placeholder="ex. 15" autocomplete="off"></label>
-    <label class="f">Visé (mg/L)<input id="stab-cible" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f adv">Visé (mg/L)<input id="stab-cible" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <p class="hint"><strong>Conseillé :</strong> viser 30 à 40 mg/L (plage 20 à 50). L'acide cyanurique protège le chlore du soleil ; sous un soleil fort, visez plutôt 40. Au-delà de 50, il rend le chlore moins efficace.</p>
+  <p class="hint adv"><strong>Conseillé :</strong> viser 30 à 40 mg/L (plage 20 à 50). L'acide cyanurique protège le chlore du soleil ; sous un soleil fort, visez plutôt 40. Au-delà de 50, il rend le chlore moins efficace.</p>
+  <p class="hint simple" id="h-stab"></p>
   <div class="result" id="r-stab" aria-live="polite"></div>
-  <details><summary>Détail du calcul</summary><ol class="calc" id="d-stab"></ol></details>
+  <details class="adv"><summary>Détail du calcul</summary><ol class="calc" id="d-stab"></ol></details>
 </section>
 
 <section class="card" aria-labelledby="t-sel">
   <div class="card-head"><span class="step">4</span><h2 id="t-sel">Sel</h2><span class="chip" id="s-sel"></span></div>
   <div class="grid">
     <label class="f">Mesuré (g/L)<input id="sel" data-save inputmode="decimal" placeholder="ex. 3,5" autocomplete="off"></label>
-    <label class="f">Visé (g/L)<input id="sel-cible" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f adv">Visé (g/L)<input id="sel-cible" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <p class="hint"><strong>Conseillé :</strong> le taux de la notice de votre électrolyseur, souvent 4 à 5 g/L (1,5 à 2 g/L pour les modèles basse salinité). Trop bas, l'électrolyseur se met en défaut ; trop haut, il corrode. 1 g/L = 1 000 ppm.</p>
+  <p class="hint adv"><strong>Conseillé :</strong> le taux de la notice de votre électrolyseur, souvent 4 à 5 g/L (1,5 à 2 g/L pour les modèles basse salinité). Trop bas, l'électrolyseur se met en défaut ; trop haut, il corrode. 1 g/L = 1 000 ppm.</p>
+  <p class="hint simple" id="h-sel"></p>
   <div class="result" id="r-sel" aria-live="polite"></div>
-  <details><summary>Détail du calcul</summary><ol class="calc" id="d-sel"></ol></details>
+  <details class="adv"><summary>Détail du calcul</summary><ol class="calc" id="d-sel"></ol></details>
 </section>
 
 <section class="card" aria-labelledby="t-phos">
   <div class="card-head"><span class="step">5</span><h2 id="t-phos">Anti-phosphates</h2><span class="chip" id="s-phos"></span></div>
   <div class="grid">
     <label class="f">Phosphates mesurés (ppb)<input id="phos" data-save inputmode="decimal" placeholder="ex. 500" autocomplete="off"></label>
-    <label class="f">Visé (ppb)<input id="phos-cible" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f adv">Visé (ppb)<input id="phos-cible" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <fieldset>
+  <fieldset class="adv">
     <legend>Dose indiquée sur l'étiquette du produit</legend>
     <div class="grid">
       <label class="f">Quantité (mL)<input id="phos-ml" data-save inputmode="decimal" autocomplete="off"></label>
@@ -311,22 +334,23 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
       <label class="f">et un taux (ppb)<input id="phos-ppb" data-save inputmode="decimal" autocomplete="off"></label>
     </div>
   </fieldset>
-  <p class="hint"><strong>Conseillé :</strong> 0 ppb après traitement, moins de 100 ppb au quotidien. Les phosphates nourrissent les algues et font consommer du chlore. 1 mg/L = 1 000 ppb (µg/L). Dose par défaut : la formule courante des produits au chlorure de lanthane, 75 mL pour 10 m³ et 500 ppb.</p>
+  <p class="hint adv"><strong>Conseillé :</strong> 0 ppb après traitement, moins de 100 ppb au quotidien. Les phosphates nourrissent les algues et font consommer du chlore. 1 mg/L = 1 000 ppb (µg/L). Dose par défaut : la formule courante des produits au chlorure de lanthane, 75 mL pour 10 m³ et 500 ppb.</p>
+  <p class="hint simple" id="h-phos"></p>
   <div class="result" id="r-phos" aria-live="polite"></div>
-  <details><summary>Détail du calcul</summary><ol class="calc" id="d-phos"></ol></details>
+  <details class="adv"><summary>Détail du calcul</summary><ol class="calc" id="d-phos"></ol></details>
 </section>
 
 <section class="card" aria-labelledby="t-cl">
   <div class="card-head"><span class="step">6</span><h2 id="t-cl">Chlore libre</h2><span class="chip" id="s-cl"></span></div>
   <div class="grid">
     <label class="f">Mesuré (mg/L)<input id="cl" data-save inputmode="decimal" placeholder="ex. 0,8" autocomplete="off"></label>
-    <label class="f">Visé (mg/L)<input id="cl-cible" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f adv">Visé (mg/L)<input id="cl-cible" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <div class="grid">
+  <div class="grid adv">
     <label class="f">Production électrolyseur (g/h)<input id="cl-prod" data-save inputmode="decimal" autocomplete="off"></label>
     <label class="f">Filtration (h/jour)<input id="cl-heures" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <div class="grid">
+  <div class="grid adv">
     <label class="f wide">Chlore choc
       <select id="cl-produit" data-save>
         <option value="hypo">Hypochlorite de calcium (granulés)</option>
@@ -336,9 +360,10 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
     </label>
     <label class="f">Chlore actif (%)<input id="cl-pct" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <p class="hint"><strong>Conseillé :</strong> viser 2 mg/L (plage 1 à 3), et au moins 5 % du stabilisant : 1,5 à 2 mg/L pour 30 à 40 mg/L de stabilisant. 1 mg/L = 1 ppm. La production en g/h est sur la notice de l'électrolyseur (souvent 10 à 35 g/h).</p>
+  <p class="hint adv"><strong>Conseillé :</strong> viser 2 mg/L (plage 1 à 3), et au moins 5 % du stabilisant : 1,5 à 2 mg/L pour 30 à 40 mg/L de stabilisant. 1 mg/L = 1 ppm. La production en g/h est sur la notice de l'électrolyseur (souvent 10 à 35 g/h).</p>
+  <p class="hint simple" id="h-cl"></p>
   <div class="result" id="r-cl" aria-live="polite"></div>
-  <details><summary>Détail du calcul</summary><ol class="calc" id="d-cl"></ol></details>
+  <details class="adv"><summary>Détail du calcul</summary><ol class="calc" id="d-cl"></ol></details>
 </section>
 
 <section class="card" aria-labelledby="t-todo">
@@ -1003,6 +1028,7 @@ var Calc = (function () {
       ['cl', calcChlore(v), 'Chlore']
     ];
     res.forEach(function (r) { afficher(r[0], r[1]); });
+    indicesSimples(v);
     var todo = res.filter(function (r) { return r[1].todo; });
     var mesures = res.filter(function (r) { return r[1].etat !== 'empty'; });
     var liste = $('todo');
@@ -1016,6 +1042,32 @@ var Calc = (function () {
     calcVolume();
     ecrireMemoire();
   }
+
+  // ---------- Version simple : rappel des réglages masqués ----------
+  function indicesSimples(v) {
+    var t = function (x, d) { return isNaN(x) ? '—' : nf(x, d); };
+    $('h-tac').textContent = 'Visé : ' + t(v.tacCible) + ' mg/L (plage 80 à 120).';
+    $('h-ph').textContent = 'Visé : ' + t(v.phCible) + ' (plage 7,0 à 7,4). pH moins : ' + NOM_ACIDE[v.phProduit] + ' ' + t(v.phPct, 1) + ' %.';
+    $('h-stab').textContent = 'Visé : ' + t(v.stabCible) + ' mg/L (plage 20 à 50).';
+    $('h-sel').textContent = 'Visé : ' + t(v.selCible) + ' g/L, selon la notice de l\'électrolyseur.';
+    $('h-phos').textContent = 'Visé : ' + t(v.phosCible) + ' ppb (moins de 100 conseillé). Dose de l\'étiquette : ' +
+      t(v.phosMl) + ' mL pour ' + t(v.phosM3) + ' m³ et ' + t(v.phosPpb) + ' ppb.';
+    $('h-cl').textContent = 'Visé : ' + t(v.clCible) + ' mg/L (plage 1 à 3). Électrolyseur : ' + t(v.clProd) +
+      ' g/h ; choc : ' + NOM_CHLORE[v.clProduit] + ' ' + t(v.clPct, 1) + ' %.';
+  }
+
+  // ---------- Version simple ou avancée ----------
+  var CLE_MODE = 'calculateur-piscine-mode';
+  var boutonsMode = Array.prototype.slice.call(document.querySelectorAll('[data-mode-btn]'));
+  function appliquerMode(m) {
+    document.documentElement.dataset.mode = m;
+    boutonsMode.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.modeBtn === m)); });
+    try { localStorage.setItem(CLE_MODE, m); } catch (e) { /* stockage indisponible */ }
+  }
+  boutonsMode.forEach(function (b) {
+    b.addEventListener('click', function () { appliquerMode(b.dataset.modeBtn); });
+  });
+  appliquerMode(document.documentElement.dataset.mode === 'avance' ? 'avance' : 'simple');
 
   // ---------- Événements ----------
   remplir(lireMemoire());

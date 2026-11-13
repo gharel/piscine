@@ -6,7 +6,12 @@ En ligne : https://gharel.github.io/piscine/
 
 ## Utilisation
 
-Ouvrez `index.html` dans un navigateur (en ligne ou en local, hors connexion). Saisissez le volume, puis vos mesures. Les cibles sont pré-remplies et modifiables. Les saisies restent dans le navigateur (localStorage).
+Ouvrez `index.html` dans un navigateur (en ligne ou en local, hors connexion). Saisissez le volume, puis vos mesures. Les saisies restent dans le navigateur (localStorage).
+
+Deux versions, au choix en haut de la page :
+
+- **Simple** : volume et mesures seulement. Les cibles et produits sont les valeurs conseillées, rappelées sous chaque mesure. Chaque carte donne la dose et le produit.
+- **Avancée** : en plus, la température, les cibles, le choix et la concentration des produits, la production de l'électrolyseur, la dose de l'étiquette anti-phosphates, le tableau des valeurs recommandées et le détail de chaque calcul.
 
 ## Valeurs recommandées
 
