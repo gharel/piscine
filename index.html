@@ -164,6 +164,17 @@ ul.tips li { margin: 5px 0; }
 h3 { font-size: 1rem; margin: 18px 0 0; }
 footer { font-size: .82rem; color: var(--muted); margin-top: 16px; }
 footer p { margin: 6px 0; }
+.hint strong { color: var(--text); }
+table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .92rem; }
+.reco th, .reco td { text-align: left; vertical-align: top; padding: 8px 8px 8px 0; border-bottom: 1px solid var(--border); }
+.reco thead th { font-size: .8rem; font-weight: 600; color: var(--muted); }
+.reco tbody th { font-weight: 600; }
+.reco td:nth-child(2) { font-weight: 700; color: var(--link); }
+.reco td:last-child { color: var(--muted); }
+.explain { font-size: .92rem; }
+.explain p { margin: 8px 0 0; }
+.explain ul { margin: 8px 0 0; padding-left: 1.2em; }
+.explain li { margin: 5px 0; }
 @media (max-width: 480px) { .wide { grid-column: 1 / -1; } }
 </style>
 </head>
@@ -171,7 +182,7 @@ footer p { margin: 6px 0; }
 <div class="wrap">
 <header>
   <h1>Calculateur piscine au sel</h1>
-  <p>Doses de pH, stabilisant, sel, anti-phosphates et chlore pour une piscine avec électrolyseur, selon son volume. Chaque résultat montre son calcul.</p>
+  <p>Doses de TAC, pH, stabilisant, sel, anti-phosphates et chlore pour une piscine avec électrolyseur, selon son volume. Chaque résultat montre son calcul.</p>
 </header>
 
 <main>
@@ -201,12 +212,53 @@ footer p { margin: 6px 0; }
   </details>
 </section>
 
+<section class="card" aria-labelledby="t-reco">
+  <div class="card-head"><h2 id="t-reco">Valeurs recommandées</h2></div>
+  <p class="hint">Pour une piscine au sel avec électrolyseur. Les champs « visé » sont pré-remplis avec ces valeurs.</p>
+  <table class="reco">
+    <thead><tr><th scope="col">Paramètre</th><th scope="col">À viser</th><th scope="col">Plage correcte</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">TAC</th><td>80 à 90 mg/L</td><td>80 à 120 mg/L (8 à 12 °f)</td></tr>
+      <tr><th scope="row">pH</th><td>7,2</td><td>7,0 à 7,4</td></tr>
+      <tr><th scope="row">Stabilisant</th><td>30 à 40 mg/L</td><td>20 à 50 mg/L</td></tr>
+      <tr><th scope="row">Sel</th><td>4 à 5 g/L</td><td>selon la notice ; 1,5 à 2 g/L en basse salinité</td></tr>
+      <tr><th scope="row">Phosphates</th><td>0 ppb après traitement</td><td>moins de 100 ppb</td></tr>
+      <tr><th scope="row">Chlore libre</th><td>2 mg/L</td><td>1 à 3 mg/L, et au moins 5 % du stabilisant</td></tr>
+    </tbody>
+  </table>
+  <div class="row"><button type="button" class="ghost" id="reco-reset">Remettre les valeurs visées conseillées</button></div>
+</section>
+
+<section class="card" aria-labelledby="t-tac">
+  <div class="card-head"><span class="step">1</span><h2 id="t-tac">TAC (alcalinité)</h2><span class="chip" id="s-tac"></span></div>
+  <div class="grid">
+    <label class="f">TAC mesuré (mg/L)<input id="tac" data-save inputmode="decimal" placeholder="ex. 110" autocomplete="off"></label>
+    <label class="f">TAC visé (mg/L)<input id="tac-cible" data-save inputmode="decimal" autocomplete="off"></label>
+  </div>
+  <p class="hint"><strong>Conseillé :</strong> viser 80 à 90 mg/L (plage 80 à 120). Avec un électrolyseur, le bas de la plage limite la remontée du pH. Votre trousse donne des °f ? Multipliez par 10.</p>
+  <details>
+    <summary>Qu'est-ce que le TAC ?</summary>
+    <div class="explain">
+      <p>Le TAC (titre alcalimétrique complet, ou alcalinité totale) mesure la capacité de l'eau à résister aux variations de pH : c'est son amortisseur, fait surtout de bicarbonates. Il s'exprime en mg/L de CaCO₃ ou en degrés français (1 °f = 10 mg/L).</p>
+      <ul>
+        <li><strong>Trop bas</strong> (moins de 80 mg/L) : le pH fait le yoyo, une petite dose de pH moins le fait chuter, et l'eau devient agressive pour les joints et les métaux.</li>
+        <li><strong>Trop haut</strong> (plus de 120 mg/L) : le pH remonte sans cesse, surtout avec un électrolyseur, dont les bulles chassent le CO₂. Il faut beaucoup d'acide, et l'eau entartre ou se trouble.</li>
+        <li><strong>Toujours avant le pH</strong> : corrigez le TAC, attendez quelques heures, remesurez le pH, puis corrigez-le. Plus le TAC est haut, plus il faut d'acide pour baisser le pH.</li>
+        <li><strong>Le monter</strong> : bicarbonate de sodium (TAC plus), 1,68 g par m³ pour 1 mg/L. Il change peu le pH.</li>
+        <li><strong>Le baisser</strong> : du pH moins pour descendre le pH vers 7,0, puis aérez l'eau (cascade, buses de refoulement vers la surface) : le pH remonte sans que le TAC remonte. Recommencez jusqu'au TAC visé.</li>
+        <li>Une partie du TAC mesuré vient du stabilisant (environ un tiers de son taux) : le calcul du pH en tient compte.</li>
+      </ul>
+    </div>
+  </details>
+  <div class="result" id="r-tac" aria-live="polite"></div>
+  <details><summary>Détail du calcul</summary><ol class="calc" id="d-tac"></ol></details>
+</section>
+
 <section class="card" aria-labelledby="t-ph">
-  <div class="card-head"><span class="step">1</span><h2 id="t-ph">pH</h2><span class="chip" id="s-ph"></span></div>
+  <div class="card-head"><span class="step">2</span><h2 id="t-ph">pH</h2><span class="chip" id="s-ph"></span></div>
   <div class="grid">
     <label class="f">pH mesuré<input id="ph" data-save inputmode="decimal" placeholder="ex. 7,6" autocomplete="off"></label>
     <label class="f">pH visé<input id="ph-cible" data-save inputmode="decimal" autocomplete="off"></label>
-    <label class="f">TAC mesuré (mg/L)<input id="tac" data-save inputmode="decimal" placeholder="100 si inconnu" autocomplete="off"></label>
   </div>
   <div class="grid">
     <label class="f wide">pH moins utilisé
@@ -218,35 +270,35 @@ footer p { margin: 6px 0; }
     </label>
     <label class="f"><span id="ph-pct-label">Pureté (%)</span><input id="ph-pct" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <p class="hint">Plage conseillée : 7,0 à 7,4. L'électrolyse fait monter le pH : contrôlez-le chaque semaine. pH plus : carbonate de sodium.</p>
+  <p class="hint"><strong>Conseillé :</strong> viser 7,2 (plage 7,0 à 7,4). L'électrolyse fait monter le pH : contrôlez-le chaque semaine. Plus il est bas, plus le chlore est actif. pH plus : carbonate de sodium.</p>
   <div class="result" id="r-ph" aria-live="polite"></div>
   <details><summary>Détail du calcul</summary><ol class="calc" id="d-ph"></ol></details>
 </section>
 
 <section class="card" aria-labelledby="t-stab">
-  <div class="card-head"><span class="step">2</span><h2 id="t-stab">Stabilisant</h2><span class="chip" id="s-stab"></span></div>
+  <div class="card-head"><span class="step">3</span><h2 id="t-stab">Stabilisant</h2><span class="chip" id="s-stab"></span></div>
   <div class="grid">
     <label class="f">Mesuré (mg/L)<input id="stab" data-save inputmode="decimal" placeholder="ex. 15" autocomplete="off"></label>
     <label class="f">Visé (mg/L)<input id="stab-cible" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <p class="hint">Acide cyanurique, plage conseillée : 20 à 50 mg/L. Il protège le chlore du soleil ; trop haut, il le rend moins efficace.</p>
+  <p class="hint"><strong>Conseillé :</strong> viser 30 à 40 mg/L (plage 20 à 50). L'acide cyanurique protège le chlore du soleil ; sous un soleil fort, visez plutôt 40. Au-delà de 50, il rend le chlore moins efficace.</p>
   <div class="result" id="r-stab" aria-live="polite"></div>
   <details><summary>Détail du calcul</summary><ol class="calc" id="d-stab"></ol></details>
 </section>
 
 <section class="card" aria-labelledby="t-sel">
-  <div class="card-head"><span class="step">3</span><h2 id="t-sel">Sel</h2><span class="chip" id="s-sel"></span></div>
+  <div class="card-head"><span class="step">4</span><h2 id="t-sel">Sel</h2><span class="chip" id="s-sel"></span></div>
   <div class="grid">
     <label class="f">Mesuré (g/L)<input id="sel" data-save inputmode="decimal" placeholder="ex. 3,5" autocomplete="off"></label>
     <label class="f">Visé (g/L)<input id="sel-cible" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <p class="hint">Taux visé : celui de la notice de votre électrolyseur (souvent 4 à 5 g/L, 1,5 g/L pour les modèles basse salinité). 1 g/L = 1 000 ppm.</p>
+  <p class="hint"><strong>Conseillé :</strong> le taux de la notice de votre électrolyseur, souvent 4 à 5 g/L (1,5 à 2 g/L pour les modèles basse salinité). Trop bas, l'électrolyseur se met en défaut ; trop haut, il corrode. 1 g/L = 1 000 ppm.</p>
   <div class="result" id="r-sel" aria-live="polite"></div>
   <details><summary>Détail du calcul</summary><ol class="calc" id="d-sel"></ol></details>
 </section>
 
 <section class="card" aria-labelledby="t-phos">
-  <div class="card-head"><span class="step">4</span><h2 id="t-phos">Anti-phosphates</h2><span class="chip" id="s-phos"></span></div>
+  <div class="card-head"><span class="step">5</span><h2 id="t-phos">Anti-phosphates</h2><span class="chip" id="s-phos"></span></div>
   <div class="grid">
     <label class="f">Phosphates mesurés (ppb)<input id="phos" data-save inputmode="decimal" placeholder="ex. 500" autocomplete="off"></label>
     <label class="f">Visé (ppb)<input id="phos-cible" data-save inputmode="decimal" autocomplete="off"></label>
@@ -259,13 +311,13 @@ footer p { margin: 6px 0; }
       <label class="f">et un taux (ppb)<input id="phos-ppb" data-save inputmode="decimal" autocomplete="off"></label>
     </div>
   </fieldset>
-  <p class="hint">Conseillé : moins de 100 ppb. 1 mg/L = 1 000 ppb (µg/L). Par défaut, la formule courante des produits au chlorure de lanthane : 75 mL pour 10 m³ et 500 ppb.</p>
+  <p class="hint"><strong>Conseillé :</strong> 0 ppb après traitement, moins de 100 ppb au quotidien. Les phosphates nourrissent les algues et font consommer du chlore. 1 mg/L = 1 000 ppb (µg/L). Dose par défaut : la formule courante des produits au chlorure de lanthane, 75 mL pour 10 m³ et 500 ppb.</p>
   <div class="result" id="r-phos" aria-live="polite"></div>
   <details><summary>Détail du calcul</summary><ol class="calc" id="d-phos"></ol></details>
 </section>
 
 <section class="card" aria-labelledby="t-cl">
-  <div class="card-head"><span class="step">5</span><h2 id="t-cl">Chlore libre</h2><span class="chip" id="s-cl"></span></div>
+  <div class="card-head"><span class="step">6</span><h2 id="t-cl">Chlore libre</h2><span class="chip" id="s-cl"></span></div>
   <div class="grid">
     <label class="f">Mesuré (mg/L)<input id="cl" data-save inputmode="decimal" placeholder="ex. 0,8" autocomplete="off"></label>
     <label class="f">Visé (mg/L)<input id="cl-cible" data-save inputmode="decimal" autocomplete="off"></label>
@@ -284,7 +336,7 @@ footer p { margin: 6px 0; }
     </label>
     <label class="f">Chlore actif (%)<input id="cl-pct" data-save inputmode="decimal" autocomplete="off"></label>
   </div>
-  <p class="hint">1 mg/L = 1 ppm. La production en g/h est sur la notice de l'électrolyseur (souvent 10 à 35 g/h).</p>
+  <p class="hint"><strong>Conseillé :</strong> viser 2 mg/L (plage 1 à 3), et au moins 5 % du stabilisant : 1,5 à 2 mg/L pour 30 à 40 mg/L de stabilisant. 1 mg/L = 1 ppm. La production en g/h est sur la notice de l'électrolyseur (souvent 10 à 35 g/h).</p>
   <div class="result" id="r-cl" aria-live="polite"></div>
   <details><summary>Détail du calcul</summary><ol class="calc" id="d-cl"></ol></details>
 </section>
@@ -295,7 +347,7 @@ footer p { margin: 6px 0; }
   <h3>Précautions</h3>
   <ul class="tips">
     <li>Filtration en marche pendant chaque ajout et au moins quelques heures après.</li>
-    <li>Un produit à la fois : attendez quelques heures entre deux produits et remesurez avant le suivant.</li>
+    <li>Un produit à la fois : attendez quelques heures entre deux produits et remesurez avant le suivant. Le TAC se corrige avant le pH.</li>
     <li>Ne mélangez jamais un acide (pH moins) et du chlore, ni dans un seau ni au même endroit du bassin.</li>
     <li>Versez toujours le produit dans l'eau, jamais l'eau sur le produit. Gants et lunettes pour les acides.</li>
     <li>Sel : électrolyseur arrêté jusqu'à dissolution complète, sel réparti dans le bassin, filtration 24 h.</li>
@@ -422,6 +474,8 @@ var Calc = (function () {
   function sel(V, mesure, cible) { return (cible - mesure) * V; }                // kg
   function stabilisant(V, mesure, cible, purete) { return (cible - mesure) * V / (purete / 100); } // g
   function tacPlus(V, mesure, cible) { return (cible - mesure) / CACO3_EQ * MM.NaHCO3 * V; }  // g
+  // Acide (moles d'équivalents) pour baisser le TAC, avec aération pour ramener le pH
+  function tacMoins(V, mesure, cible) { return (mesure - cible) / CACO3_EQ * V; }
 
   // Chlore : g de chlore actif à apporter, puis quantité du produit
   function densiteChloreLiquide(pct) { return 1 + 0.0165 * pct; }
@@ -450,7 +504,7 @@ var Calc = (function () {
 
   return {
     MM: MM, CACO3_EQ: CACO3_EQ, interp: interp, constantes: constantes, especes: especes,
-    ph: ph, acide: acide, sel: sel, stabilisant: stabilisant, tacPlus: tacPlus,
+    ph: ph, acide: acide, sel: sel, stabilisant: stabilisant, tacPlus: tacPlus, tacMoins: tacMoins,
     chlore: chlore, densiteChloreLiquide: densiteChloreLiquide, heuresElectrolyse: heuresElectrolyse,
     phosphates: phosphates, dilution: dilution
   };
@@ -465,7 +519,8 @@ var Calc = (function () {
   var DEFAUTS = {
     volume: '50', temp: '28',
     'vol-forme': 'rect', 'vol-l': '', 'vol-w': '', 'vol-d': '', 'vol-pmin': '', 'vol-pmax': '',
-    ph: '', 'ph-cible': '7,2', tac: '', 'ph-produit': 'bisulfate', 'ph-pct': '93',
+    tac: '', 'tac-cible': '90',
+    ph: '', 'ph-cible': '7,2', 'ph-produit': 'bisulfate', 'ph-pct': '93',
     stab: '', 'stab-cible': '30',
     sel: '', 'sel-cible': '4',
     phos: '', 'phos-cible': '0', 'phos-ml': '75', 'phos-m3': '10', 'phos-ppb': '500',
@@ -554,7 +609,76 @@ var Calc = (function () {
     };
   }
 
+  // Quantité de pH moins (produit choisi dans la carte pH) pour eq moles d'acide, avec sa ligne de calcul
+  function doseAcide(eq, v) {
+    var prod = Calc.acide(v.phProduit, v.phPct);
+    var q = eq / prod.eqParUnite;
+    var r = {
+      q: q,
+      txt: prod.unite === 'g' ? masse(q) : volumeL(q),
+      nom: NOM_ACIDE[v.phProduit] + ' ' + nf(v.phPct, 1) + ' %'
+    };
+    if (v.phProduit === 'bisulfate') {
+      r.ligne = 'Bisulfate de sodium (120,06 g/mol, pureté ' + nf(v.phPct, 1) + ' %) : ' + nf(eq, 2) + ' × 120,06 ÷ ' +
+        nf(v.phPct / 100, 3) + ' = ' + masse(q) + '.';
+    } else {
+      r.ligne = majuscule(NOM_ACIDE[v.phProduit]) + ' à ' + nf(v.phPct, 1) + ' % (densité ' + nf(prod.densite, 3) + ') : ' +
+        nf(v.phPct, 1) + ' % × ' + nf(prod.densite, 3) + ' × 1 000' + (v.phProduit === 'h2so4' ? ' × 2' : '') + ' ÷ ' +
+        (v.phProduit === 'hcl' ? '36,46' : '98,08') + ' = ' + nf(prod.eqParUnite, 2) + ' mol d\'acide par litre, donc ' +
+        nf(eq, 2) + ' ÷ ' + nf(prod.eqParUnite, 2) + ' = ' + volumeL(q) + '.';
+    }
+    return r;
+  }
+
   // ---------- Paramètres ----------
+  function calcTac(v) {
+    if (!(v.volume > 0)) return vide('Saisissez le volume du bassin.');
+    if (isNaN(v.tac)) return vide('Saisissez le TAC mesuré pour obtenir la dose.');
+    if (isNaN(v.tacCible)) return vide('Saisissez le TAC visé.');
+    var V = v.volume;
+    var etat = v.tac < 80 ? 'low' : (v.tac > 120 ? 'high' : 'ok');
+    var ecart = v.tacCible - v.tac;
+    if (ecart >= 1) {
+      var g = Calc.tacPlus(V, v.tac, v.tacCible);
+      return {
+        etat: etat,
+        html: '<p class="dose">Ajouter ' + masse(g) + ' de TAC plus</p><p class="sub">Bicarbonate de sodium, pour passer de ' +
+          nf(v.tac) + ' à ' + nf(v.tacCible) + ' mg/L. Il change peu le pH : remesurez-le quelques heures après.' +
+          (etat === 'ok' ? ' Facultatif : le TAC est déjà dans la plage.' : '') + '</p>',
+        detail: [
+          'Écart : ' + nf(v.tacCible) + ' − ' + nf(v.tac) + ' = ' + nf(ecart) + ' mg/L de CaCO₃, soit ' + nf(ecart) + ' ÷ 50,04 = ' +
+            nf(ecart / 50.04, 3) + ' mmol/L.',
+          'Bicarbonate de sodium (84,01 g/mol, 1 équivalent par mole) : 84,01 ÷ 50,04 = 1,68 g par m³ et par mg/L.',
+          'Dose : ' + nf(ecart) + ' × 1,68 × ' + nf(V) + ' m³ = ' + masse(g) + '.'
+        ],
+        todo: etat !== 'ok' ? 'Ajouter ' + masse(g) + ' de TAC plus (bicarbonate de sodium), puis remesurer le pH.' : null
+      };
+    }
+    if (etat === 'high') {
+      var eq = Calc.tacMoins(V, v.tac, v.tacCible);
+      var a = doseAcide(eq, v);
+      return {
+        etat: etat,
+        html: '<p class="dose">Environ ' + a.txt + ' de pH moins au total</p><p class="sub">' + majuscule(a.nom) +
+          ', pour baisser le TAC de ' + nf(v.tac) + ' à ' + nf(v.tacCible) + ' mg/L, en plusieurs fois : descendez le pH vers 7,0, ' +
+          'aérez l\'eau (cascade, buses vers la surface) pour le faire remonter, puis recommencez. Ne descendez pas sous 7,0.</p>',
+        detail: [
+          'Écart : ' + nf(v.tac) + ' − ' + nf(v.tacCible) + ' = ' + nf(-ecart) + ' mg/L de CaCO₃, soit ' + nf(-ecart) + ' ÷ 50,04 = ' +
+            nf(-ecart / 50.04, 3) + ' mmol/L d\'acide (l\'aération chasse le CO₂ formé, le pH revient sans que le TAC remonte).',
+          'Total : ' + nf(-ecart / 50.04, 3) + ' mmol/L × ' + nf(V * 1000, 0) + ' L = ' + nf(eq, 2) + ' mol.',
+          a.ligne
+        ],
+        todo: 'Baisser le TAC : environ ' + a.txt + ' de pH moins au total, en plusieurs fois avec aération entre deux, sans descendre sous pH 7,0.'
+      };
+    }
+    return {
+      etat: etat,
+      html: '<p class="dose">Rien à ajouter</p><p class="sub">Le TAC est dans la plage conseillée.' +
+        (ecart < 0 ? ' Le pH moins le fera baisser peu à peu.' : '') + '</p>',
+      detail: ['Mesure ' + nf(v.tac) + ' mg/L, plage conseillée 80 à 120 mg/L : aucune correction.']
+    };
+  }
+
   function calcPh(v) {
     if (!(v.volume > 0)) return vide('Saisissez le volume du bassin.');
     if (isNaN(v.ph)) return vide('Saisissez le pH mesuré pour obtenir la dose.');
@@ -562,7 +686,8 @@ var Calc = (function () {
     var V = v.volume;
     var notes = [];
     var tac = v.tac;
-    if (isNaN(tac)) { tac = 100; notes.push('TAC non saisi : 100 mg/L pris par défaut. Mesurez-le pour un calcul juste.'); }
+    if (isNaN(tac)) { tac = 100; notes.push('TAC non saisi (étape 1) : 100 mg/L pris par défaut. Mesurez-le pour un calcul juste.'); }
+    else if (tac < 80 || tac > 120) notes.push('Corrigez d\'abord le TAC (étape 1), puis remesurez le pH : cette dose vaut pour le TAC actuel.');
     var stab = isNaN(v.stab) ? 0 : v.stab;
     var selGL = !isNaN(v.sel) ? v.sel : (!isNaN(v.selCible) ? v.selCible : 0);
     var temp = isNaN(v.temp) ? 25 : v.temp;
@@ -579,23 +704,15 @@ var Calc = (function () {
         ', soit un carbone inorganique total de ' + mmol(r.ct) + ' (inchangé par l\'acide).'
     ];
     if (r.tacFaible) notes.push('Le TAC saisi est plus bas que l\'alcalinité due au stabilisant : vérifiez vos mesures.');
-    if (tac < 80) {
-      notes.push('TAC bas (conseillé 80 à 120 mg/L) : le pH sera instable. Remontez d\'abord le TAC à 100 mg/L avec ' +
-        masse(Calc.tacPlus(V, tac, 100)) + ' de bicarbonate de sodium (TAC plus, 1,68 g par m³ et par mg/L), puis recalculez.');
-    } else if (tac > 150) {
-      notes.push('TAC élevé (conseillé 80 à 120 mg/L) : le pH remontera vite. L\'acide le fait baisser peu à peu.');
-    }
 
     var ecart = v.phCible - v.ph;
     var html, todo = null;
     if (Math.abs(ecart) < 0.05) {
       html = '<p class="dose">Rien à ajouter</p><p class="sub">Le pH est au niveau visé.</p>';
     } else if (ecart < 0) {
-      var prod = Calc.acide(v.phProduit, v.phPct);
       var eq = r.acide * V * 1000;
-      var q = eq / prod.eqParUnite;
-      var qTxt = prod.unite === 'g' ? masse(q) : volumeL(q);
-      var nom = NOM_ACIDE[v.phProduit] + ' ' + nf(v.phPct, 1) + ' %';
+      var a = doseAcide(eq, v);
+      var qTxt = a.txt, nom = a.nom;
       html = '<p class="dose">Ajouter ' + qTxt + ' de pH moins</p><p class="sub">' + majuscule(nom) +
         ', pour passer de ' + nf(v.ph) + ' à ' + nf(v.phCible) + '. TAC après correction ≈ ' + nf(r.tacApres, 0) + ' mg/L.</p>';
       if (ecart <= -0.3) html += '<p class="sub">Versez en 2 ou 3 fois, à quelques heures d\'intervalle, et remesurez.</p>';
@@ -603,16 +720,7 @@ var Calc = (function () {
         nf(r.cya1 * 1000, 3) + ' + eau ' + nf(r.e1.w * 1000, 4) + ' = ' + mmol(r.alk1) + '.');
       detail.push('Acide à apporter : ' + nf(r.alk0 * 1000, 3) + ' − ' + nf(r.alk1 * 1000, 3) + ' = ' + mmol(r.acide) +
         ' × ' + nf(V * 1000, 0) + ' L = ' + nf(eq, 2) + ' mol.');
-      if (v.phProduit === 'bisulfate') {
-        detail.push('Bisulfate de sodium (120,06 g/mol, pureté ' + nf(v.phPct, 1) + ' %) : ' + nf(eq, 2) + ' × 120,06 ÷ ' +
-          nf(v.phPct / 100, 3) + ' = ' + masse(q) + '.');
-      } else {
-        var mm = v.phProduit === 'hcl' ? '36,46' : '98,08';
-        detail.push(majuscule(NOM_ACIDE[v.phProduit]) + ' à ' + nf(v.phPct, 1) +
-          ' % (densité ' + nf(prod.densite, 3) + ') : ' + nf(v.phPct, 1) + ' % × ' + nf(prod.densite, 3) + ' × 1 000' +
-          (v.phProduit === 'h2so4' ? ' × 2' : '') + ' ÷ ' + mm + ' = ' + nf(prod.eqParUnite, 2) + ' mol d\'acide par litre, donc ' +
-          nf(eq, 2) + ' ÷ ' + nf(prod.eqParUnite, 2) + ' = ' + volumeL(q) + '.');
-      }
+      detail.push(a.ligne);
       detail.push('TAC après correction : ' + nf(r.alk1 * 1000, 3) + ' mmol/L × 50,04 ≈ ' + nf(r.tacApres, 0) + ' mg/L.');
       if (etat !== 'ok') todo = 'Ajouter ' + qTxt + ' de pH moins (' + nom + ')' + (ecart <= -0.3 ? ', en 2 ou 3 fois' : '') + '.';
     } else {
@@ -870,7 +978,7 @@ var Calc = (function () {
   function lire() {
     return {
       volume: nombre('volume'), temp: nombre('temp'),
-      ph: nombre('ph'), phCible: nombre('ph-cible'), tac: nombre('tac'),
+      ph: nombre('ph'), phCible: nombre('ph-cible'), tac: nombre('tac'), tacCible: nombre('tac-cible'),
       phProduit: $('ph-produit').value, phPct: nombre('ph-pct'),
       stab: nombre('stab'), stabCible: nombre('stab-cible'),
       sel: nombre('sel'), selCible: nombre('sel-cible'),
@@ -887,6 +995,7 @@ var Calc = (function () {
     if (!(v.phPct > 0)) v.phPct = Number(PCT_ACIDE[v.phProduit]);
     if (!(v.clPct > 0)) v.clPct = Number(PCT_CHLORE[v.clProduit].replace(',', '.'));
     var res = [
+      ['tac', calcTac(v), 'TAC'],
       ['ph', calcPh(v), 'pH'],
       ['stab', calcStab(v), 'Stabilisant'],
       ['sel', calcSel(v), 'Sel'],
@@ -919,6 +1028,10 @@ var Calc = (function () {
   $('vol-use').addEventListener('click', function () {
     if (!this.dataset.v) return;
     $('volume').value = this.dataset.v;
+    mettreAJour();
+  });
+  $('reco-reset').addEventListener('click', function () {
+    ['tac-cible', 'ph-cible', 'stab-cible', 'sel-cible', 'phos-cible', 'cl-cible'].forEach(function (id) { $(id).value = DEFAUTS[id]; });
     mettreAJour();
   });
   $('reset').addEventListener('click', function () {
