@@ -8,10 +8,10 @@ En ligne : https://gharel.github.io/piscine/
 
 Ouvrez `index.html` dans un navigateur (en ligne ou en local, hors connexion). Saisissez le volume, puis vos mesures. Les saisies restent dans le navigateur (localStorage).
 
-Deux versions, au choix en haut de la page :
+Un interrupteur « Mode avancé » en haut de la page choisit l'affichage :
 
-- **Simple** : volume et mesures seulement. Les cibles et produits sont les valeurs conseillées, rappelées sous chaque mesure. Chaque carte donne la dose et le produit.
-- **Avancée** : en plus, la température, les cibles, le choix et la concentration des produits, la production de l'électrolyseur, la dose de l'étiquette anti-phosphates, le tableau des valeurs recommandées et le détail de chaque calcul.
+- **Mode simple** (par défaut) : le volume et un formulaire court de six mesures, avec la cible rappelée sous chacune, puis la liste des actions dans l'ordre (dose et produit). Les cibles et produits sont ceux du mode avancé, réglés par défaut sur les valeurs conseillées.
+- **Mode avancé** : une carte par paramètre avec la température, les cibles, le choix et la concentration des produits, la production de l'électrolyseur, la dose de l'étiquette anti-phosphates, le tableau des valeurs recommandées, l'explication du TAC et le détail de chaque calcul.
 
 ## Valeurs recommandées
 
