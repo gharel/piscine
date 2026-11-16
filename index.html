@@ -128,12 +128,42 @@ header p { margin: 0 0 18px; color: var(--muted); }
   border: 1px solid var(--border); border-radius: 8px;
   padding: 9px 10px; width: 100%; min-width: 0;
 }
-.f-head {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-  gap: 2px 6px; min-height: 30px;
+/* Champ avec unité : la valeur, puis l'unité accolée à droite (menu ou texte fixe) */
+.saisie {
+  display: flex; align-items: stretch;
+  background: var(--field);
+  border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden;
 }
-.f .f-head select { width: auto; padding: 3px 4px; font-size: .88rem; border-radius: 6px; }
-.f-head .u { font-weight: 400; }
+.saisie:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.f .saisie input { flex: 1 1 auto; border: 0; border-radius: 0; background: transparent; padding-right: 4px; }
+.saisie input:focus-visible, .saisie select:focus-visible { outline: none; }
+.unite {
+  position: relative; flex: none; display: flex; align-items: center;
+  border-left: 1px solid var(--border);
+  background: var(--res-bg); color: var(--link);
+  font-size: .88rem; font-weight: 600;
+  transition: background .15s, color .15s;
+}
+.unite.fixe { padding: 0 12px; color: var(--muted); font-weight: 500; }
+.f .unite select {
+  -webkit-appearance: none; appearance: none;
+  height: 100%; width: 5.1em;
+  padding: 0 26px 0 11px;
+  font: inherit; color: inherit;
+  background: transparent; border: 0; border-radius: 0;
+  cursor: pointer;
+}
+.unite select option { background: var(--surface); color: var(--text); font-weight: 400; }
+.unite:not(.fixe)::after {
+  content: ""; position: absolute; right: 11px; top: 50%;
+  width: 6px; height: 6px; margin-top: -5px;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(45deg); pointer-events: none;
+}
+.unite:not(.fixe):hover { color: var(--text); }
+.unite:not(.fixe):focus-within { background: var(--accent); color: var(--accent-text); }
+@media (prefers-reduced-motion: reduce) { .unite { transition: none; } }
 fieldset { border: 0; padding: 0; margin: 12px 0 0; min-width: 0; }
 legend { font-size: .85rem; color: var(--muted); font-weight: 500; padding: 0; margin-bottom: 2px; }
 fieldset .grid { margin-top: 4px; }
@@ -267,12 +297,12 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
 <section class="card simple" aria-labelledby="t-mesures">
   <div class="card-head"><h2 id="t-mesures">Vos mesures</h2></div>
   <div class="grid">
-    <label class="f"><span class="f-head">pH</span><input data-lien="ph" inputmode="decimal" placeholder="ex. 7,6" autocomplete="off"><span class="mini" id="m-ph"></span></label>
-    <label class="f"><span class="f-head">Chlore libre <select data-lien="cl-unite" aria-label="Unité du chlore libre"></select></span><input data-lien="cl" inputmode="decimal" autocomplete="off"><span class="mini" id="m-cl"></span></label>
-    <label class="f"><span class="f-head">Sel <select data-lien="sel-unite" aria-label="Unité du sel"></select></span><input data-lien="sel" inputmode="decimal" autocomplete="off"><span class="mini" id="m-sel"></span></label>
-    <label class="f"><span class="f-head">Stabilisant <select data-lien="stab-unite" aria-label="Unité du stabilisant"></select></span><input data-lien="stab" inputmode="decimal" autocomplete="off"><span class="mini" id="m-stab"></span></label>
-    <label class="f"><span class="f-head">Phosphates <select data-lien="phos-unite" aria-label="Unité des phosphates"></select></span><input data-lien="phos" inputmode="decimal" autocomplete="off"><span class="mini" id="m-phos"></span></label>
-    <label class="f"><span class="f-head">TAC <select data-lien="tac-unite" aria-label="Unité du TAC"></select></span><input data-lien="tac" inputmode="decimal" autocomplete="off"><span class="mini" id="m-tac"></span></label>
+    <label class="f">pH<input data-lien="ph" inputmode="decimal" placeholder="ex. 7,6" autocomplete="off"><span class="mini" id="m-ph"></span></label>
+    <label class="f">Chlore libre<span class="saisie"><input data-lien="cl" inputmode="decimal" autocomplete="off"><span class="unite"><select data-lien="cl-unite" aria-label="Unité du chlore libre"></select></span></span><span class="mini" id="m-cl"></span></label>
+    <label class="f">Sel<span class="saisie"><input data-lien="sel" inputmode="decimal" autocomplete="off"><span class="unite"><select data-lien="sel-unite" aria-label="Unité du sel"></select></span></span><span class="mini" id="m-sel"></span></label>
+    <label class="f">Stabilisant<span class="saisie"><input data-lien="stab" inputmode="decimal" autocomplete="off"><span class="unite"><select data-lien="stab-unite" aria-label="Unité du stabilisant"></select></span></span><span class="mini" id="m-stab"></span></label>
+    <label class="f">Phosphates<span class="saisie"><input data-lien="phos" inputmode="decimal" autocomplete="off"><span class="unite"><select data-lien="phos-unite" aria-label="Unité des phosphates"></select></span></span><span class="mini" id="m-phos"></span></label>
+    <label class="f">TAC<span class="saisie"><input data-lien="tac" inputmode="decimal" autocomplete="off"><span class="unite"><select data-lien="tac-unite" aria-label="Unité du TAC"></select></span></span><span class="mini" id="m-tac"></span></label>
   </div>
   <p class="hint">Choisissez l'unité affichée par votre trousse à côté de chaque mesure : les doses en tiennent compte. Sel : 1 g/L = 1 000 ppm. Pour le chlore, le stabilisant et le TAC, mg/L et ppm sont identiques.</p>
   <h3>À faire, dans l'ordre</h3>
@@ -320,8 +350,8 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
 <section class="card adv" aria-labelledby="t-cl">
   <div class="card-head"><span class="step">2</span><h2 id="t-cl">Chlore libre</h2><span class="chip" id="s-cl"></span></div>
   <div class="grid">
-    <label class="f"><span class="f-head">Mesuré <select id="cl-unite" data-save aria-label="Unité du chlore libre"></select></span><input id="cl" data-save inputmode="decimal" autocomplete="off"></label>
-    <label class="f adv"><span class="f-head">Visé <span class="u" data-unite="cl"></span></span><input id="cl-cible" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f">Mesuré<span class="saisie"><input id="cl" data-save inputmode="decimal" autocomplete="off"><span class="unite"><select id="cl-unite" data-save aria-label="Unité du chlore libre"></select></span></span></label>
+    <label class="f adv">Visé<span class="saisie"><input id="cl-cible" data-save inputmode="decimal" autocomplete="off"><span class="unite fixe" data-unite="cl"></span></span></label>
   </div>
   <div class="grid adv">
     <label class="f">Production électrolyseur (g/h)<input id="cl-prod" data-save inputmode="decimal" autocomplete="off"></label>
@@ -345,10 +375,10 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
 <section class="card adv" aria-labelledby="t-sel">
   <div class="card-head"><span class="step">3</span><h2 id="t-sel">Sel</h2><span class="chip" id="s-sel"></span></div>
   <div class="grid">
-    <label class="f"><span class="f-head">Mesuré <select id="sel-unite" data-save aria-label="Unité du sel"></select></span><input id="sel" data-save inputmode="decimal" autocomplete="off"></label>
-    <label class="f adv"><span class="f-head">Visé <span class="u" data-unite="sel"></span></span><input id="sel-cible" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f">Mesuré<span class="saisie"><input id="sel" data-save inputmode="decimal" autocomplete="off"><span class="unite"><select id="sel-unite" data-save aria-label="Unité du sel"></select></span></span></label>
+    <label class="f adv">Visé<span class="saisie"><input id="sel-cible" data-save inputmode="decimal" autocomplete="off"><span class="unite fixe" data-unite="sel"></span></span></label>
   </div>
-  <p class="hint adv"><strong>Conseillé :</strong> le taux de la notice de votre électrolyseur, souvent <span data-uv="sel" data-a="4" data-b="5"></span> (<span data-uv="sel" data-a="1.5" data-b="2"></span> pour les modèles basse salinité). Trop bas, l'électrolyseur se met en défaut ; trop haut, il corrode. Unités des trousses : 1 g/L = 1 000 ppm (mg/L) = 1 ‰ (ppt) = 0,1 %.</p>
+  <p class="hint adv"><strong>Conseillé :</strong> le taux de la notice de votre électrolyseur, souvent <span data-uv="sel" data-a="4" data-b="5"></span> (<span data-uv="sel" data-a="1.5" data-b="2"></span> pour les modèles basse salinité). Trop bas, l'électrolyseur se met en défaut ; trop haut, il corrode. Unités des trousses : 1 g/L = 1 000 ppm (mg/L) = 1 ppt (‰) = 0,1 %.</p>
   <div class="result" id="r-sel" aria-live="polite"></div>
   <details class="adv"><summary>Détail du calcul</summary><ol class="calc" id="d-sel"></ol></details>
 </section>
@@ -356,8 +386,8 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
 <section class="card adv" aria-labelledby="t-stab">
   <div class="card-head"><span class="step">4</span><h2 id="t-stab">Stabilisant</h2><span class="chip" id="s-stab"></span></div>
   <div class="grid">
-    <label class="f"><span class="f-head">Mesuré <select id="stab-unite" data-save aria-label="Unité du stabilisant"></select></span><input id="stab" data-save inputmode="decimal" autocomplete="off"></label>
-    <label class="f adv"><span class="f-head">Visé <span class="u" data-unite="stab"></span></span><input id="stab-cible" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f">Mesuré<span class="saisie"><input id="stab" data-save inputmode="decimal" autocomplete="off"><span class="unite"><select id="stab-unite" data-save aria-label="Unité du stabilisant"></select></span></span></label>
+    <label class="f adv">Visé<span class="saisie"><input id="stab-cible" data-save inputmode="decimal" autocomplete="off"><span class="unite fixe" data-unite="stab"></span></span></label>
   </div>
   <p class="hint adv"><strong>Conseillé :</strong> viser <span data-uv="stab" data-a="30" data-b="40"></span> (plage <span data-uv="stab" data-a="20" data-b="50"></span>). L'acide cyanurique protège le chlore du soleil ; sous un soleil fort, visez plutôt <span data-uv="stab" data-a="40"></span>. Au-delà de <span data-uv="stab" data-a="50"></span>, il rend le chlore moins efficace. 1 mg/L = 1 ppm.</p>
   <div class="result" id="r-stab" aria-live="polite"></div>
@@ -367,8 +397,8 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
 <section class="card adv" aria-labelledby="t-phos">
   <div class="card-head"><span class="step">5</span><h2 id="t-phos">Anti-phosphates</h2><span class="chip" id="s-phos"></span></div>
   <div class="grid">
-    <label class="f"><span class="f-head">Phosphates mesurés <select id="phos-unite" data-save aria-label="Unité des phosphates"></select></span><input id="phos" data-save inputmode="decimal" autocomplete="off"></label>
-    <label class="f adv"><span class="f-head">Visé <span class="u" data-unite="phos"></span></span><input id="phos-cible" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f">Phosphates mesurés<span class="saisie"><input id="phos" data-save inputmode="decimal" autocomplete="off"><span class="unite"><select id="phos-unite" data-save aria-label="Unité des phosphates"></select></span></span></label>
+    <label class="f adv">Visé<span class="saisie"><input id="phos-cible" data-save inputmode="decimal" autocomplete="off"><span class="unite fixe" data-unite="phos"></span></span></label>
   </div>
   <fieldset class="adv">
     <legend>Dose indiquée sur l'étiquette du produit</legend>
@@ -386,8 +416,8 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
 <section class="card adv" aria-labelledby="t-tac">
   <div class="card-head"><span class="step">6</span><h2 id="t-tac">TAC (alcalinité)</h2><span class="chip" id="s-tac"></span></div>
   <div class="grid">
-    <label class="f"><span class="f-head">TAC mesuré <select id="tac-unite" data-save aria-label="Unité du TAC"></select></span><input id="tac" data-save inputmode="decimal" autocomplete="off"></label>
-    <label class="f adv"><span class="f-head">TAC visé <span class="u" data-unite="tac"></span></span><input id="tac-cible" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f">TAC mesuré<span class="saisie"><input id="tac" data-save inputmode="decimal" autocomplete="off"><span class="unite"><select id="tac-unite" data-save aria-label="Unité du TAC"></select></span></span></label>
+    <label class="f adv">TAC visé<span class="saisie"><input id="tac-cible" data-save inputmode="decimal" autocomplete="off"><span class="unite fixe" data-unite="tac"></span></span></label>
   </div>
   <p class="hint adv"><strong>Conseillé :</strong> viser <span data-uv="tac" data-a="80" data-b="90"></span> (plage <span data-uv="tac" data-a="80" data-b="120"></span>). Avec un électrolyseur, le bas de la plage limite la remontée du pH. À corriger avant le pH. Unités des trousses : 1 ppm = 1 mg/L, 1 °f = 10 mg/L, 1 °dH = 17,85 mg/L.</p>
   <div class="result" id="r-tac" aria-live="polite"></div>
@@ -585,7 +615,7 @@ var Calc = (function () {
     sel: { base: 'g/L', liste: [
       { id: 'gl', court: 'g/L', f: 1, d: 2 },
       { id: 'ppm', court: 'ppm', f: 0.001, d: 0 },          // 1 g/L = 1 000 ppm (mg/L)
-      { id: 'ppt', court: '‰', nom: 'ppt ‰', f: 1, d: 2 },  // parties pour mille, g/kg ≈ g/L
+      { id: 'ppt', court: 'ppt', f: 1, d: 2 },              // parties pour mille (‰), g/kg ≈ g/L
       { id: 'pct', court: '%', f: 10, d: 3 }                // 1 % = 10 g/L
     ] },
     stab: { base: 'mg/L', liste: [

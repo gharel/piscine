@@ -31,7 +31,7 @@ Chaque mesure (sauf le pH) a un choix d'unité, celle affichée par la trousse d
 | Paramètre | Unités proposées | Base des calculs |
 |---|---|---|
 | Chlore libre | mg/L, ppm (identiques) | mg/L |
-| Sel | ppm (par défaut), g/L, ‰ (ppt), % | g/L : 1 g/L = 1 000 ppm = 1 ‰ = 0,1 % |
+| Sel | ppm (par défaut), g/L, ppt (‰), % | g/L : 1 g/L = 1 000 ppm = 1 ppt = 0,1 % |
 | Stabilisant | mg/L, ppm (identiques) | mg/L |
 | Phosphates | ppb, ppm, mg/L | ppb : 1 ppm = 1 mg/L = 1 000 ppb |
 | TAC | mg/L, ppm, °f, °dH | mg/L de CaCO₃ : 1 °f = 10 mg/L, 1 °dH = 17,85 mg/L |
