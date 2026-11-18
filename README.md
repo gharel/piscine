@@ -11,7 +11,15 @@ Ouvrez `index.html` dans un navigateur (en ligne ou en local, hors connexion). S
 Un interrupteur « Mode avancé » en haut de la page choisit l'affichage :
 
 - **Mode simple** (par défaut) : le volume et un formulaire court de six mesures (pH, chlore, sel, stabilisant, phosphates, TAC), avec l'unité au choix et la cible rappelée sous chacune, puis la liste des actions dans l'ordre de traitement (le TAC avant le pH). Les cibles et produits sont ceux du mode avancé, réglés par défaut sur les valeurs conseillées.
-- **Mode avancé** : une carte par paramètre avec la température, les cibles, le choix et la concentration des produits, la production de l'électrolyseur, la dose de l'étiquette anti-phosphates, le tableau des valeurs recommandées, l'explication du TAC et le détail de chaque calcul.
+- **Mode avancé** : une carte par paramètre avec la température, les cibles, le choix et la concentration des produits, la production de l'électrolyseur, la dose de l'étiquette anti-phosphates, le tableau des valeurs recommandées, l'explication du TAC, l'entretien périodique et le détail de chaque calcul.
+
+### Entretien périodique (mode avancé)
+
+Plutôt qu'un gros ajout par an, des doses régulières qui gardent le sel et le stabilisant près de leur cible (un sel qui baisse fait chuter la production de l'électrolyseur, un stabilisant qui baisse laisse le soleil détruire le chlore : l'eau verdit). À partir du sel ajouté par an (en sacs de 25 kg), de la fréquence choisie (tous les 1 à 6 mois, 3 par défaut) et de la remontée du pH par semaine, la carte donne :
+
+- le sel et le stabilisant à ajouter à chaque échéance, et le taux le plus bas atteint juste avant, comparé à un seul ajout par an ;
+- la dose de pH moins de chaque semaine et le total à prévoir sur la période, avec la baisse du TAC qu'elle entraîne ;
+- un rythme de contrôle léger (bandelette pH et chlore toutes les 2 semaines, analyse complète à chaque ajout de sel) et la dose de sel et de stabilisant par m³ d'eau neuve après un débordement ou une vidange.
 
 ## Valeurs recommandées
 
@@ -51,5 +59,7 @@ V = volume en m³. 1 mg/L dans 1 m³ = 1 g ; 1 g/L dans 1 m³ = 1 kg.
 | pH | Modèle des carbonates : l'acide (ou le carbonate de sodium) nécessaire est la variation d'alcalinité des carbonates et du stabilisant entre le pH mesuré et le pH visé, à carbone total constant. Constantes corrigées selon la température (Plummer et Busenberg 1982) et la salinité (Davies). Produits : bisulfate de sodium, acide chlorhydrique, acide sulfurique ; carbonate de sodium pour le pH plus. |
 | Anti-phosphates | mL = dose de l'étiquette × (V ÷ volume de l'étiquette) × (écart ÷ taux de l'étiquette). Par défaut 75 mL pour 10 m³ et 500 ppb. |
 | Valeur trop haute | Part d'eau à renouveler = 1 − cible ÷ mesure |
+| Entretien : sel et stabilisant | Le sel ne s'use pas (l'électrolyseur le recycle) : il part avec l'eau renouvelée, et le stabilisant avec lui. Part d'eau renouvelée par an = sel ajouté par an (kg) ÷ (sel visé × V). Par échéance de n mois : sel = kg par an × n ÷ 12 ; stabilisant (g) = part renouvelée × stabilisant visé × V × n ÷ 12 ÷ 0,99. |
+| Entretien : pH moins | Acide pour ramener chaque semaine le pH de (visé + remontée) au pH visé, avec le modèle du pH, au TAC, stabilisant et sel visés. Il retire autant de TAC : acide (mmol/L) × 50,04 mg/L par semaine. |
 
 Valeurs indicatives : la notice des produits et de l'électrolyseur prime.

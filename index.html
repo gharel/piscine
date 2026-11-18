@@ -250,6 +250,7 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
 .explain p { margin: 8px 0 0; }
 .explain ul { margin: 8px 0 0; padding-left: 1.2em; }
 .explain li { margin: 5px 0; }
+.result .bloc + .bloc { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
 @media (max-width: 480px) { .wide { grid-column: 1 / -1; } }
 </style>
 </head>
@@ -264,7 +265,7 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
     <span>Mode avancé</span>
   </label>
   <p class="mode-note simple">Mode simple : le volume, vos mesures, les doses. Cibles et produits suivent les valeurs conseillées ; activez le mode avancé pour les régler et voir le détail des calculs.</p>
-  <p class="mode-note adv">Mode avancé : cibles, produits, électrolyseur, dose de l'étiquette et détail de chaque calcul.</p>
+  <p class="mode-note adv">Mode avancé : cibles, produits, électrolyseur, dose de l'étiquette, entretien périodique et détail de chaque calcul.</p>
 </header>
 
 <main>
@@ -443,6 +444,28 @@ table.reco { width: 100%; border-collapse: collapse; margin-top: 10px; font-size
   <ol class="todo" id="todo" aria-live="polite"></ol>
 </section>
 
+<section class="card adv" aria-labelledby="t-ent">
+  <div class="card-head"><h2 id="t-ent">Entretien périodique</h2></div>
+  <div class="grid">
+    <label class="f">Sel ajouté par an (sacs de 25 kg)<input id="ent-sel" data-save inputmode="decimal" autocomplete="off"></label>
+    <label class="f">Sel et stabilisant
+      <select id="ent-mois" data-save>
+        <option value="1">Tous les mois</option>
+        <option value="2">Tous les 2 mois</option>
+        <option value="3">Tous les 3 mois</option>
+        <option value="4">Tous les 4 mois</option>
+        <option value="6">Tous les 6 mois</option>
+      </select>
+    </label>
+    <label class="f">Remontée du pH par semaine<input id="ent-ph" data-save inputmode="decimal" placeholder="ex. 0,2" autocomplete="off"></label>
+  </div>
+  <p class="hint"><strong>Principe :</strong> de petites doses régulières plutôt qu'un gros ajout par an. Un sel qui baisse fait chuter la production de l'électrolyseur, un stabilisant qui baisse laisse le soleil détruire le chlore : dans les deux cas, l'eau verdit. Le sel ne s'use pas, il part avec l'eau renouvelée, et le stabilisant avec lui : le sel ajouté par an donne la dose des deux. Remontée du pH : de combien il monte en une semaine sans correction, souvent 0,1 à 0,3 avec un électrolyseur.</p>
+  <div class="result" id="r-ent" aria-live="polite"></div>
+  <h3>Pour vérifier sans tout mesurer</h3>
+  <ul class="tips" id="ent-tips"></ul>
+  <details><summary>Détail du calcul</summary><ol class="calc" id="d-ent"></ol></details>
+</section>
+
 <section class="card" aria-label="Précautions">
   <details>
   <summary>Précautions avant de traiter</summary>
@@ -596,6 +619,10 @@ var Calc = (function () {
   }
   function heuresElectrolyse(V, ecart, gParHeure) { return ecart * V / gParHeure; }
 
+  // Entretien : part de l'eau renouvelée par an, déduite du sel ajouté (kg) au taux visé (g/L).
+  // Le sel ne s'use pas (l'électrolyseur le recycle) : il ne part qu'avec l'eau.
+  function renouvellement(kgSelAn, V, selGL) { return kgSelAn / (selGL * V); }
+
   // Anti-phosphates : dose de l'étiquette (ml pour m3 et ppb), proportionnelle au volume et à l'écart
   function phosphates(V, ecart, ml, m3, ppb) { return ml * (V / m3) * (ecart / ppb); }
 
@@ -645,7 +672,7 @@ var Calc = (function () {
     MM: MM, CACO3_EQ: CACO3_EQ, interp: interp, constantes: constantes, especes: especes,
     ph: ph, acide: acide, sel: sel, stabilisant: stabilisant, tacPlus: tacPlus, tacMoins: tacMoins,
     chlore: chlore, densiteChloreLiquide: densiteChloreLiquide, heuresElectrolyse: heuresElectrolyse,
-    phosphates: phosphates, dilution: dilution
+    renouvellement: renouvellement, phosphates: phosphates, dilution: dilution
   };
 })();
 </script>
@@ -662,7 +689,8 @@ var Calc = (function () {
     cl: '', 'cl-prod': '20', 'cl-heures': '8', 'cl-produit': 'hypo', 'cl-pct': '65',
     sel: '', stab: '',
     phos: '', 'phos-ml': '75', 'phos-m3': '10', 'phos-ppb': '500',
-    tac: ''
+    tac: '',
+    'ent-sel': '2', 'ent-mois': '3', 'ent-ph': '0,2'
   };
   // Paramètres à unité au choix : valeur visée conseillée et exemple, en unité de base (voir Calc.UNITES)
   var CIBLE = { cl: 2, sel: 4, stab: 30, phos: 0, tac: 90 };
@@ -813,7 +841,7 @@ var Calc = (function () {
     var prod = Calc.acide(v.phProduit, v.phPct);
     var q = eq / prod.eqParUnite;
     var r = {
-      q: q,
+      q: q, unite: prod.unite,
       txt: prod.unite === 'g' ? masse(q) : volumeL(q),
       nom: NOM_ACIDE[v.phProduit] + ' ' + nf(v.phPct, 1) + ' %'
     };
@@ -1147,6 +1175,128 @@ var Calc = (function () {
     };
   }
 
+  // ---------- Entretien périodique ----------
+  // Sel et stabilisant partent avec l'eau renouvelée (lavages du filtre, éclaboussures, débordements) :
+  // le sel ajouté par an donne la part d'eau renouvelée, donc la perte de stabilisant. Le pH moins
+  // compense chaque semaine la remontée due à l'électrolyse (dégazage du CO₂).
+  var PERIODE = { 1: 'tous les mois', 2: 'tous les 2 mois', 3: 'tous les 3 mois', 4: 'tous les 4 mois', 6: 'tous les 6 mois' };
+  function calcEntretien(v) {
+    var V = v.volume, mois = v.entMois;
+    var quand = PERIODE[mois] || 'tous les ' + mois + ' mois';
+    var sur = mois === 1 ? 'sur un mois' : 'sur ' + mois + ' mois';
+    var blocs = [], detail = [], notes = [];
+    var avecStab = v.stabCible > 0;
+    var tips = [
+      '<strong>Sans mesure :</strong> le pH moins chaque semaine, le sel et le stabilisant ' + quand + '.',
+      '<strong>Toutes les 2 semaines :</strong> pH et chlore libre à la bandelette. Si le pH reste au-dessus de 7,4, ' +
+        'augmentez la remontée saisie ; s\'il descend sous 7,0, réduisez-la. Si le chlore baisse, montez la production de l\'électrolyseur.',
+      '<strong>À chaque ajout de sel :</strong> une analyse complète (sel, stabilisant, TAC, phosphates), corrigée avec les cartes ci-dessus. ' +
+        'Si le sel mesuré reste bas ou monte d\'un ajout à l\'autre, ajustez le nombre de sacs par an.'
+    ];
+    if (v.selCible > 0) {
+      tips.push('<strong>Après un débordement ou une vidange partielle :</strong> par m³ d\'eau neuve, ' + nf(v.selCible, 2) + ' kg de sel' +
+        (avecStab ? ' et ' + masse(Calc.stabilisant(1, 0, v.stabCible, PURETE_STAB)) + ' de stabilisant' : '') + ', sans attendre la date prévue.');
+    }
+    if (!(V > 0)) return { vide: true, html: '<p class="sub">Saisissez le volume du bassin.</p>', detail: [], tips: tips };
+
+    // Sel et stabilisant
+    if (!(v.entSel >= 0)) {
+      blocs.push('<p class="sub">Saisissez le sel ajouté par an pour les doses de sel et de stabilisant.</p>');
+    } else if (!(v.selCible > 0)) {
+      blocs.push('<p class="sub">Saisissez le sel visé (carte Sel) pour les doses de sel et de stabilisant.</p>');
+    } else if (v.entSel === 0) {
+      blocs.push('<p class="sub">Aucun sel ajouté par an : pas d\'ajout périodique de sel ni de stabilisant.</p>');
+    } else {
+      var kgAn = v.entSel * SAC_SEL, stock = v.selCible * V;
+      var r = Calc.renouvellement(kgAn, V, v.selCible);
+      var kg = kgAn * mois / 12, sacs = kg / SAC_SEL;
+      var selMin = Math.max(0, v.selCible - kg / V), selMinAn = Math.max(0, v.selCible - kgAn / V);
+      detail.push('Le sel ne s\'use pas : l\'électrolyseur le change en chlore, qui redevient du sel. Il ne part qu\'avec l\'eau ' +
+        '(lavages du filtre, éclaboussures, débordements, vidanges), et le stabilisant avec lui.');
+      detail.push('Sel ajouté par an : ' + nf(v.entSel) + ' × 25 kg = ' + nf(kgAn, 1) + ' kg. Au taux visé (' + enBase('sel', v.selCible) +
+        '), le bassin en contient ' + nf(v.selCible, 3) + ' × ' + nf(V) + ' m³ = ' + nf(stock, 1) + ' kg (1 g/L dans 1 m³ = 1 kg).');
+      detail.push('Eau renouvelée par an : ' + nf(kgAn, 1) + ' ÷ ' + nf(stock, 1) + ' = ' + pct(r, 1) + ' du bassin, soit ' + nf(r * V, 1) + ' m³.');
+      detail.push('Sel ' + quand + ' : ' + nf(kgAn, 1) + ' kg × ' + mois + ' ÷ 12 = ' + nf(kg, 1) + ' kg, soit ' + nf(sacs, 2) + ' sac de 25 kg.');
+      var dose = majuscule(quand) + ' : ' + nf(kg, 1) + ' kg de sel';
+      var sub = 'Sel : ' + nf(sacs, 2) + ' sac' + (sacs >= 2 ? 's' : '') + ' de 25 kg, électrolyseur arrêté jusqu\'à dissolution.';
+      var avant = 'le sel n\'est descendu qu\'à ' + approx('sel', selMin), avantAn = approx('sel', selMinAn);
+      if (avecStab) {
+        var perteAn = r * v.stabCible, perte = perteAn * mois / 12;
+        var g = Calc.stabilisant(V, 0, perte, PURETE_STAB);
+        var stabMin = Math.max(0, v.stabCible - perte), stabMinAn = Math.max(0, v.stabCible - perteAn);
+        detail.push('Stabilisant parti avec la même eau : ' + pct(r, 1) + ' × ' + nf(v.stabCible) + ' mg/L = ' + nf(perteAn, 2) +
+          ' mg/L par an, soit ' + nf(perteAn, 2) + ' × ' + mois + ' ÷ 12 = ' + nf(perte, 2) + ' mg/L ' + quand + '.');
+        detail.push('Stabilisant ' + quand + ' : ' + nf(perte, 2) + ' mg/L × ' + nf(V) + ' m³ = ' + nf(perte * V, 1) +
+          ' g pur, ÷ 0,99 = ' + masse(g) + ' d\'acide cyanurique à ' + PURETE_STAB + ' %.');
+        detail.push('Juste avant l\'ajout : sel ' + nf(v.selCible, 3) + ' − ' + nf(kg, 1) + ' ÷ ' + nf(V) + ' = ' + nf(selMin, 3) +
+          ' g/L, stabilisant ' + nf(v.stabCible) + ' − ' + nf(perte, 2) + ' = ' + nf(stabMin, 1) + ' mg/L. Avec un seul ajout par an : ' +
+          nf(selMinAn, 3) + ' g/L et ' + nf(stabMinAn, 1) + ' mg/L.');
+        dose += ' et ' + masse(g) + ' de stabilisant';
+        sub += ' Stabilisant : acide cyanurique ' + PURETE_STAB + ' %, en chaussette dans le skimmer.';
+        avant += ' et le stabilisant à ' + approx('stab', stabMin);
+        avantAn += ' et ' + approx('stab', stabMinAn);
+      } else {
+        detail.push('Juste avant l\'ajout : sel ' + nf(v.selCible, 3) + ' − ' + nf(kg, 1) + ' ÷ ' + nf(V) + ' = ' + nf(selMin, 3) +
+          ' g/L ; avec un seul ajout par an : ' + nf(selMinAn, 3) + ' g/L.');
+        sub += ' Stabilisant : saisissez le taux visé (carte Stabilisant) pour sa dose.';
+      }
+      blocs.push('<p class="dose">' + dose + '</p><p class="sub">' + sub + '</p><p class="sub">Juste avant chaque ajout, ' + avant +
+        ', contre ' + avantAn + ' avec un seul ajout par an.</p>');
+      if (r > 0.75) notes.push('Cela fait ' + pct(r) + ' de l\'eau renouvelée par an : c\'est beaucoup. Vérifiez les fuites et la durée des lavages du filtre.');
+    }
+
+    // pH moins, chaque semaine
+    var phV = isNaN(v.phCible) ? 7.2 : v.phCible;
+    if (isNaN(v.entPh)) {
+      blocs.push('<p class="sub">Saisissez la remontée du pH par semaine pour la dose de pH moins.</p>');
+    } else if (v.entPh <= 0) {
+      blocs.push('<p class="dose">Pas de pH moins régulier</p><p class="sub">Le pH ne remonte pas d\'une semaine à l\'autre.</p>');
+    } else {
+      var tacSrc = v.tacCible > 0 ? 'visé' : (v.tac > 0 ? 'mesuré' : 'par défaut');
+      var tac = v.tacCible > 0 ? v.tacCible : (v.tac > 0 ? v.tac : 90);
+      var stab = avecStab ? v.stabCible : 0;
+      var temp = isNaN(v.temp) ? 25 : v.temp;
+      var selGL = v.selCible > 0 ? v.selCible : 0;
+      var haut = phV + v.entPh;
+      var rp = Calc.ph({ pH: haut, cible: phV, tac: tac, stab: stab, temp: temp, sel: selGL });
+      var eq = rp.acide * V * 1000;
+      var a = doseAcide(eq, v);
+      var semaines = Math.round(mois * 52 / 12);
+      var total = a.q * semaines;
+      var totalTxt = a.unite === 'g' ? masse(total) : volumeL(total);
+      var baisseTac = rp.acide * Calc.CACO3_EQ * 1000;   // mg/L de TAC par semaine
+      detail.push('pH moins : chaque semaine, le pH remonte de ' + nf(v.entPh) + ' et revient de ' + nf(haut) + ' à ' + nf(phV) +
+        '. Calcul au TAC ' + tacSrc + ' (' + enBase('tac', tac) + '), avec ' + nf(stab) + ' mg/L de stabilisant et ' + nf(selGL, 2) +
+        ' g/L de sel, à ' + nf(temp, 1) + ' °C (modèle de la carte pH).');
+      detail.push('Alcalinité : ' + mmol(rp.alk0) + ' à pH ' + nf(haut) + ', ' + mmol(rp.alk1) + ' à pH ' + nf(phV) + ' ; acide : ' +
+        mmol(rp.acide) + ' × ' + nf(V * 1000, 0) + ' L = ' + nf(eq, 2) + ' mol par semaine.');
+      detail.push(a.ligne);
+      detail.push(majuscule(sur) + ' (' + semaines + ' semaines) : ' + semaines + ' × ' + a.txt + ' = ' + totalTxt + '.');
+      detail.push('L\'acide retire autant de TAC : ' + nf(rp.acide * 1000, 3) + ' mmol/L × 50,04 = ' + nf(baisseTac, 1) + ' mg/L par semaine, soit ' +
+        nf(baisseTac * semaines, 0) + ' mg/L ' + sur + ' sans eau neuve.');
+      blocs.push('<p class="dose">Chaque semaine : ' + a.txt + ' de pH moins</p><p class="sub">' + majuscule(a.nom) +
+        ', pour ramener le pH de ' + nf(haut) + ' à ' + nf(phV) + '. Soit ' + totalTxt + ' ' + sur +
+        ', à verser semaine après semaine : d\'un coup, le pH chuterait.</p>');
+      notes.push('Le pH moins consomme du TAC : environ ' + approx('tac', baisseTac) + ' par semaine, jusqu\'à ' +
+        approx('tac', baisseTac * semaines) + ' ' + sur + ' (moins avec l\'eau neuve, qui en rapporte). ' +
+        'Mesurez le TAC à chaque ajout de sel et remontez-le avec la carte TAC.');
+    }
+    return {
+      vide: !detail.length,
+      html: blocs.map(function (b) { return '<div class="bloc">' + b + '</div>'; }).join('') + notes.map(note).join(''),
+      detail: detail, tips: tips
+    };
+  }
+  function afficherEntretien(v) {
+    var r = calcEntretien(v);
+    var li = function (l) { return '<li>' + l + '</li>'; };
+    var res = $('r-ent');
+    res.className = 'result' + (r.vide ? ' empty' : '');
+    res.innerHTML = r.html;
+    $('ent-tips').innerHTML = r.tips.map(li).join('');
+    $('d-ent').innerHTML = r.detail.map(li).join('') || '<li>Saisissez le volume, le sel ajouté par an et la remontée du pH pour voir le calcul.</li>';
+  }
+
   // ---------- Volume ----------
   function calcVolume() {
     var forme = $('vol-forme').value;
@@ -1192,7 +1342,8 @@ var Calc = (function () {
       stab: b('stab', 'stab'), stabCible: b('stab', 'stab-cible'),
       phos: b('phos', 'phos'), phosCible: b('phos', 'phos-cible'),
       phosMl: nombre('phos-ml'), phosM3: nombre('phos-m3'), phosPpb: nombre('phos-ppb'),
-      tac: b('tac', 'tac'), tacCible: b('tac', 'tac-cible')
+      tac: b('tac', 'tac'), tacCible: b('tac', 'tac-cible'),
+      entSel: nombre('ent-sel'), entMois: Number($('ent-mois').value) || 3, entPh: nombre('ent-ph')
     };
   }
 
@@ -1225,6 +1376,7 @@ var Calc = (function () {
       ['cl', calcChlore(v), 'Chlore']
     ];
     res.forEach(function (r) { afficher(r[0], r[1]); });
+    afficherEntretien(v);
     var todo = res.filter(function (r) { return r[1].todo; });
     var mesures = res.filter(function (r) { return r[1].etat !== 'empty'; });
     afficherSimple(v, mesures);
